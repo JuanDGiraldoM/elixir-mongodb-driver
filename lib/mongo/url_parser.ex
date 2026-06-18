@@ -150,7 +150,7 @@ defmodule Mongo.UrlParser do
 
     with url_char <- String.to_charlist(url),
          {:ok, {_, _, _, _, _, srv_record}} <-
-           :inet_res.getbyname(~c"_mongodb._tcp." ++ url_char, :srv),
+           :inet_res.getbyname(~c"_mongodb._tcp." ++ url_char, :srv, [:usevc], 60_000),
          {:ok, host} <- get_host_srv(srv_record),
          {:ok, txt_record} <- resolve_txt_record(url_char),
          txt <- build_params(orig_options, txt_record) do
@@ -173,7 +173,7 @@ defmodule Mongo.UrlParser do
   end
 
   defp resolve_txt_record(url_char) do
-    case :inet_res.lookup(url_char, :in, :txt) do
+    case :inet_res.lookup(url_char, :in, :txt, [:usevc]) do
       [[txt_record] | _] ->
         {:ok, txt_record}
 
